@@ -1,0 +1,39 @@
+%% Sơ đồ AMC — bản Mermaid (để so sánh với Graphviz / D2)
+%% Render: mmdc -i amc.mmd -o amc_mermaid.svg   (cần Node + Chromium)
+flowchart TB
+  state["<b>STATE s</b> — trạng thái kênh + QoS<br/>• SNR profile: mean/var/min/percentile<br/>• Doppler / coherence time<br/>• độ tin cậy CSI (var của SNR ước lượng)<br/>• QoS: target BLER ~10%, latency budget"]
+  action["<b>ACTION a</b> — chế độ truyền (MCS)<br/>modulation {BPSK, QPSK, 16QAM}<br/>× code rate {1/2, 2/3, 3/4}<br/>× #iter decoder {5, 10, 20}<br/>→ bảng MCS thu gọn (~9 mode)"]
+  obj["<b>OBJECTIVE</b> — hàm mục tiêu<br/>max throughput hiệu dụng<br/>η = R_code × log₂(M) × (1 − BLER)<br/>ràng buộc: BLER ≤ target, runtime ≤ budget"]
+  phy["<b>PHY LINK SIMULATOR</b> — môi trường mô phỏng<br/>Vào: (channel realization, action a)<br/>Ra: BER, BLER, throughput, runtime<br/><i>single-carrier, perfect CSI; LDPC/OFDM giai đoạn sau</i>"]
+
+  subgraph OFF["OFFLINE — sinh nhãn và huấn luyện"]
+    oracle["<b>ORACLE / GENIE</b> (vét cạn)<br/>với mỗi s: thử mọi a qua simulator<br/>đo BLER tin cậy (Monte Carlo ≥ N lỗi)<br/>chọn a*(s) = argmax objective<br/>→ LUT tối ưu / upper bound"]
+    data["<b>DATASET {(s, a*)}</b><br/>cặp trạng thái → hành động tối ưu"]
+    mltrain["<b>ML POLICY π(s)</b> — DT / RF / GBDT<br/>học ánh xạ s → a*<br/>= bản nén và generalize của oracle"]
+    oracle --> data --> mltrain
+  end
+
+  subgraph ON["ONLINE — vòng quyết định runtime"]
+    ctrl["<b>BỘ QUYẾT ĐỊNH + HYSTERESIS</b><br/>s_t → π(s_t) → a_candidate<br/>đổi mode khi vượt ngưỡng và giữ đủ lâu<br/>→ a_final (mode phát)"]
+  end
+
+  eval["<b>ĐÁNH GIÁ và SO SÁNH</b> — 3 chính sách<br/>Fixed-robust · Fixed-high-TP · AI-adaptive π<br/>BER vs SNR · Throughput vs SNR · Runtime · Policy map"]
+
+  action -->|a| phy
+  phy -->|"BER/BLER, throughput, runtime"| oracle
+  obj -.->|tiêu chí chọn| oracle
+  state -.->|duyệt theo s| oracle
+  mltrain -->|π s| ctrl
+  state -.->|s_t đo online| ctrl
+  ctrl -->|AI-adaptive a*| eval
+  phy -->|đo 3 chính sách| eval
+
+  style state fill:#eef5ff
+  style action fill:#eef5ff
+  style obj fill:#eef5ff
+  style phy fill:#d8f5d0,stroke:#1a7d1a,stroke-width:3px
+  style oracle fill:#e7e0ff
+  style data fill:#e7e0ff
+  style mltrain fill:#e7e0ff
+  style ctrl fill:#ffe3c2
+  style eval fill:#fff3c4

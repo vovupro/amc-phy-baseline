@@ -1,0 +1,114 @@
+# Sơ đồ AMC — bản D2 (để so sánh với Graphviz)
+# Render:  d2 amc.d2 amc_d2.svg
+direction: down
+
+# ---- Hàng định nghĩa: STATE | ACTION | OBJECTIVE ----
+state: |md
+  **STATE s** — trạng thái kênh + QoS
+
+  - SNR profile: mean/var/min/percentile
+  - Doppler / coherence time
+  - độ tin cậy CSI (var của SNR ước lượng)
+  - QoS: target BLER ~10%, latency budget
+| {
+  style.fill: "#eef5ff"
+}
+
+action: |md
+  **ACTION a** — chế độ truyền (MCS)
+
+  modulation {BPSK, QPSK, 16QAM}
+  × code rate {1/2, 2/3, 3/4}
+  × #iter decoder {5, 10, 20}
+  → bảng MCS thu gọn (~9 mode)
+| {
+  style.fill: "#eef5ff"
+}
+
+obj: |md
+  **OBJECTIVE** — hàm mục tiêu
+
+  max throughput hiệu dụng:
+  η = R_code × log₂(M) × (1 − BLER)
+  ràng buộc: BLER ≤ target, runtime ≤ budget
+| {
+  style.fill: "#eef5ff"
+}
+
+# ---- Môi trường mô phỏng (viền xanh đậm) ----
+phy: |md
+  **PHY LINK SIMULATOR** — môi trường mô phỏng
+
+  Vào: (channel realization, action a)
+  Ra: BER, BLER, throughput, runtime
+  _bản single-carrier, perfect CSI; LDPC/OFDM giai đoạn sau_
+| {
+  style.fill: "#d8f5d0"
+  style.stroke: "#1a7d1a"
+  style.stroke-width: 3
+}
+
+# ---- OFFLINE: oracle -> dataset -> ML ----
+offline: OFFLINE — sinh nhãn & huấn luyện {
+  style.stroke-dash: 4
+  style.fill: "#faf8ff"
+
+  oracle: |md
+    **ORACLE / GENIE** (vét cạn)
+
+    với mỗi s: thử mọi a qua simulator,
+    đo BLER tin cậy (Monte Carlo ≥ N lỗi),
+    chọn a*(s) = argmax objective
+    → LUT tối ưu / upper bound
+  | { style.fill: "#e7e0ff" }
+
+  data: |md
+    **DATASET {(s, a*)}**
+
+    cặp trạng thái → hành động tối ưu
+  | { style.fill: "#e7e0ff" }
+
+  mltrain: |md
+    **ML POLICY π(s)** — DT / RF / GBDT
+
+    học ánh xạ s → a*
+    = bản nén & generalize của oracle
+  | { style.fill: "#e7e0ff" }
+
+  oracle -> data -> mltrain
+}
+
+# ---- ONLINE: bộ quyết định ----
+online: ONLINE — vòng quyết định runtime {
+  style.stroke-dash: 4
+  style.fill: "#fff7ee"
+
+  ctrl: |md
+    **BỘ QUYẾT ĐỊNH + HYSTERESIS**
+
+    s_t → π(s_t) → a_candidate
+    Hysteresis: đổi mode khi vượt ngưỡng & giữ đủ lâu
+    → a_final (mode phát)
+  | { style.fill: "#ffe3c2" }
+}
+
+# ---- Đánh giá ----
+eval: |md
+  **ĐÁNH GIÁ & SO SÁNH** — 3 chính sách
+
+  Fixed-robust · Fixed-high-TP · AI-adaptive π
+  Sản phẩm: BER vs SNR · Throughput vs SNR ·
+  Runtime/complexity table · Policy map
+| {
+  style.fill: "#fff3c4"
+}
+
+# ---- Cạnh ----
+action -> phy: a
+phy -> offline.oracle: "BER/BLER, throughput, runtime"
+obj -> offline.oracle: tiêu chí chọn { style.stroke-dash: 3 }
+state -> offline.oracle: duyệt theo s { style.stroke-dash: 3 }
+offline.mltrain -> online.ctrl: π(s)
+state -> online.ctrl: s_t đo online { style.stroke-dash: 3 }
+online.ctrl -> eval: AI-adaptive a*
+phy -> eval: đo 3 chính sách
