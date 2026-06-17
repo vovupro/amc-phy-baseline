@@ -1,0 +1,23 @@
+digraph phy_link_flow {
+	bgcolor=white fontname=Arial fontsize=16 label=<<B>Baseline PHY Link (single-carrier)  —  luồng phát → thu</B><BR/><FONT POINT-SIZE="11" COLOR="#666666">Cấu hình CỐ ĐỊNH: chưa channel coding · chưa OFDM/MIMO · perfect CSI · chưa ML  (nền cho giai đoạn AMC)</FONT><BR/> > labelloc=t rankdir=TB ranksep=0.5
+	node [fontname=Arial margin="0.22,0.16" shape=box style="rounded,filled"]
+	edge [color="#333333" fontcolor="#1a4f8a" fontname=Arial fontsize=10]
+	src [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>1. Nguồn bit</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Sinh bit ngẫu nhiên</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">shape [batch, N], b = 0/1</FONT></TD></TR></TABLE>> fillcolor="#cfe8ff" style="rounded,filled"]
+	map [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>2. Mapper</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">BPSK → pam,1   QPSK → qam,2</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">16QAM → qam,4</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Gray code, chuẩn hoá Es=1</FONT></TD></TR></TABLE>> fillcolor="#cfe8ff" style="rounded,filled"]
+	chan [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>3. Kênh truyền</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">AWGN:     y = x + n</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Rayleigh: y = h·x + n</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">n ~ CN(0, no)</FONT></TD></TR></TABLE>> fillcolor="#ffd6d6" style="rounded,filled"]
+	eq [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>4. Cân bằng kênh</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">x_hat = y / h</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">perfect CSI (AWGN: h = 1)</FONT></TD></TR></TABLE>> fillcolor="#d8f5d0" style="rounded,filled"]
+	demap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>5. Demapper</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">hard decision, khoảng cách min</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">(tính LLR rồi threshold)</FONT></TD></TR></TABLE>> fillcolor="#d8f5d0" style="rounded,filled"]
+	ber [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>6. Đo BER</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">đếm b ≠ b_hat</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">BER = #lỗi / N</FONT></TD></TR></TABLE>> fillcolor="#fff3c4" style="rounded,filled"]
+	src -> map [label="bits b" color="#333333"]
+	map -> chan [label="symbols x" color="#333333"]
+	chan -> eq [label="y nhận" color="#333333"]
+	eq -> demap [label=x_hat color="#333333"]
+	demap -> ber [label=b_hat color="#333333"]
+	no [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>no</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">noise variance</FONT></TD></TR></TABLE>> color="#b03030" fillcolor="#fff0f0" fontcolor="#b03030" shape=note style=filled]
+	no -> chan [label="" arrowhead=vee color="#b03030" constraint=false style=dashed]
+	no -> demap [label="" arrowhead=vee color="#b03030" constraint=false style=dashed]
+	chan -> eq [label="h (CSI)" arrowhead=vee color="#3a7d34" constraint=false style=dashed]
+	snrnote [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10"><FONT FACE="Consolas" POINT-SIZE="9.5">Eb/N0 (dB) — ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1) → no</FONT></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Sionna chuẩn hoá Es=1 → no = N0 (tổng phương sai nhiễu PHỨC) = no/2 mỗi chiều thực → trùng N0/2 của sách.</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Monte Carlo: dừng khi gặp ≥ 200 lỗi (không cố định số bit), cap ≤ 1e7 bit.</FONT></TD></TR></TABLE>> color="#999999" fillcolor="#eef5ff" style="rounded,filled"]
+	ber -> snrnote [label="" constraint=false style=invis]
+	dpi=300
+}

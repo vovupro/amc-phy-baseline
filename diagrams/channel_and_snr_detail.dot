@@ -1,0 +1,16 @@
+digraph channel_and_snr_detail {
+	bgcolor=white fontname=Arial fontsize=15 label=<<B>Chi tiết khối kênh &amp; quy đổi Eb/N0 → no</B><BR/> > labelloc=t nodesep=0.6 rankdir=TB ranksep=0.7
+	node [fontname=Arial margin="0.22,0.16" shape=box style="rounded,filled"]
+	edge [color="#333333" fontcolor="#1a4f8a" fontname=Arial fontsize=10]
+	{
+		rank=same
+		awgn [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>Chế độ AWGN</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">y = x + n,  n ~ CN(0, no)</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Không méo biên độ/pha</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Equalizer: bỏ qua (h = 1)</FONT></TD></TR></TABLE>> fillcolor="#ffd6d6" style="rounded,filled"]
+		rayl [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>Chế độ Rayleigh (flat) + AWGN</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">y = h·x + n,  h ~ CN(0,1), E[|h|²]=1</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Mỗi symbol một h mới (fast fading)</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Equalizer ZF: x_hat = y / h</FONT></TD></TR></TABLE>> fillcolor="#ffd6d6" style="rounded,filled"]
+	}
+	snr [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD COLSPAN="2" ALIGN="CENTER"><FONT POINT-SIZE="12"><B>Quy đổi Eb/N0 → no</B></FONT></TD></TR><TR><TD COLSPAN="2" HEIGHT="6"> </TD></TR><TR><TD ALIGN="RIGHT"><FONT POINT-SIZE="10.5">Es/N0 (lin)</FONT></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10.5">  = (Eb/N0 lin) × num_bits_per_symbol</FONT></TD></TR><TR><TD ALIGN="RIGHT"><FONT POINT-SIZE="10.5">no</FONT></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10.5">  = 1 / (Es/N0 lin)    (Sionna đặt Es = 1)</FONT></TD></TR><TR><TD COLSPAN="2" HEIGHT="6"> </TD></TR><TR><TD ALIGN="RIGHT"><FONT POINT-SIZE="10.5">BPSK</FONT></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10.5">  Es/N0 = Eb/N0 × 1</FONT></TD></TR><TR><TD ALIGN="RIGHT"><FONT POINT-SIZE="10.5">QPSK</FONT></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10.5">  Es/N0 = Eb/N0 × 2</FONT></TD></TR><TR><TD ALIGN="RIGHT"><FONT POINT-SIZE="10.5">16QAM</FONT></TD><TD ALIGN="LEFT"><FONT POINT-SIZE="10.5">  Es/N0 = Eb/N0 × 4</FONT></TD></TR><TR><TD COLSPAN="2" HEIGHT="6"> </TD></TR><TR><TD COLSPAN="2" ALIGN="CENTER"><FONT FACE="Consolas" POINT-SIZE="9.5" COLOR="#1a4f8a">no = sn.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)</FONT></TD></TR></TABLE>> color="#1a4f8a" fillcolor="#eef5ff" margin="0.25,0.18"]
+	trap [label=<<TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0" CELLPADDING="4"><TR><TD ALIGN="CENTER"><FONT POINT-SIZE="11.5"><B>CẠM BẪY — noise enhancement</B></FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Ở SNR cao, |h| có thể rất nhỏ → x_hat = y/h khuếch đại nhiễu.</FONT></TD></TR><TR><TD ALIGN="LEFT"><FONT POINT-SIZE="10">Đây là lý do BER trên Rayleigh tệ hơn AWGN nhiều dù cùng Eb/N0.</FONT></TD></TR></TABLE>> color="#b03030" fillcolor="#fff0f0" fontcolor="#b03030" shape=note style=filled]
+	awgn -> snr [label="" style=invis]
+	rayl -> snr [label="" color="#333333"]
+	snr -> trap [label="" color="#333333"]
+	dpi=300
+}
