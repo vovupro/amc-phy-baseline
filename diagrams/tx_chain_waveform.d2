@@ -1,0 +1,105 @@
+# ======================================================================
+# tx_chain_waveform.d2 — MÁY PHÁT single-carrier QAM: chuỗi ĐẦY ĐỦ bit -> RF.
+# (DSP băng gốc + DAC + RF). Đánh dấu vị trí 2 khối block 01 (nguồn bit + Mapper).
+# Bổ trợ cho phy_link_flow.d2 (góc nhìn mô phỏng/Sionna toàn tuyến).
+# Render:  python build.py tx_chain_waveform
+# ======================================================================
+...@_theme
+direction: down
+
+title: |`md
+  # Máy phát thực tế (single-carrier QAM) — chuỗi đầy đủ bit → RF
+  Block 01 (nguồn bit + Mapper) dừng ở "điểm chòm sao" x[k]; phần sau là chuỗi DSP + RF biến điểm thành sóng phát
+`| {
+  near: top-center
+  shape: text
+  style.font-size: 18
+}
+
+tx: "MÁY PHÁT (TX) — single-carrier QAM" {
+  style: { fill: "#f3f8ff"; stroke: "#6b8fb5"; stroke-dash: 4 }
+
+  bits: |`md
+    **Nguồn bit**
+
+    - b0 b1 b2 …
+  `| { class: tx }
+
+  fec: |`md
+    **Channel coding (FEC) + interleaver**
+
+    - BỎ ở pha 1 (chưa mã hoá kênh)
+  `| { style.fill: "#e6e6e6" }
+
+  sp: |`md
+    **S/P — tách k bit / symbol**
+
+    - vd QPSK: bit chẵn → I, bit lẻ → Q
+  `| { class: tx }
+
+  mapper: |`md
+    **Mapper (Gray) → điểm chòm sao**
+
+    - k bit → x[k] = I + jQ
+    - chuẩn hoá Es = 1
+  `| { class: tx }
+
+  upI: |`md
+    **Upsample L↑ + RRC g(t) — nhánh I**
+
+    - chèn mẫu + lọc tạo dạng (xung Nyquist)
+    - → a_I(t): băng gốc, giới hạn băng thông
+  `| { class: tx }
+
+  upQ: |`md
+    **Upsample L↑ + RRC g(t) — nhánh Q**
+
+    - → a_Q(t)
+  `| { class: tx }
+
+  dacI: |`md
+    **DAC + LPF tái tạo — I**
+
+    - số → tương tự, lọc ảnh (anti-imaging)
+  `| { class: tx }
+
+  dacQ: |`md
+    **DAC + LPF tái tạo — Q**
+
+    - (giống nhánh I)
+  `| { class: tx }
+
+  iqmod: |`md
+    **Điều chế I/Q (dao động LO tần số f_c)**
+
+    - × cos(2π f_c t) , × (−sin(2π f_c t)) rồi CỘNG
+    - s(t) = a_I·cos − a_Q·sin
+  `| { class: tx }
+
+  bpf: |`md
+    **Lọc thông dải (BPF)**
+
+    - loại phát xạ ngoài băng
+  `| { class: tx }
+
+  pa: |`md
+    **PA (khuếch đại công suất) → anten → RF**
+
+    - phát sóng s(t)
+  `| { class: tx }
+
+  bits -> fec -> sp -> mapper
+  mapper -> upI -> dacI -> iqmod
+  mapper -> upQ -> dacQ -> iqmod
+  iqmod -> bpf -> pa
+}
+
+# chú thích: 2 khối block 01 kết thúc ở điểm chòm sao
+b01: |`md
+  **← Block 01 (đã làm)**
+
+  - Nguồn bit + Mapper
+  - kết tại x[k] = điểm chòm sao
+  - phần dưới = chuỗi dạng sóng
+`| { class: note }
+tx.mapper -> b01: ranh giới { style: { stroke: "#888888"; stroke-dash: 3 } }

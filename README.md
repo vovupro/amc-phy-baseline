@@ -10,14 +10,25 @@ OFDM, chưa có ML — những khối đó sẽ thêm ở các giai đoạn sau.
 
 ```
 amc-phy-baseline/
-├── diagrams/                  # bộ công cụ vẽ sơ đồ hệ thống (D2)
-│   ├── _theme.d2              # bảng màu & lớp style DÙNG CHUNG (sửa 1 chỗ, áp tất cả)
-│   ├── build.py              # render *.d2 -> *.svg
-│   ├── amc_system_overview.d2 / .svg
-│   ├── phy_link_flow.d2 / .svg
-│   └── channel_and_snr_detail.d2 / .svg
-└── src/                       # code PHY link (đang phát triển)
+├── LEARNING.ipynb             # notebook vừa-làm-vừa-học (chạy từng ô + ghi chú) — MỞ CÁI NÀY
+└── diagrams/                  # sơ đồ kiến trúc hệ thống (D2)
+    ├── _theme.d2              # bảng màu & lớp style DÙNG CHUNG (sửa 1 chỗ, áp tất cả)
+    ├── build.py              # render *.d2 -> *.svg
+    ├── amc_system_overview.d2 / .svg
+    ├── phy_link_flow.d2 / .svg
+    ├── channel_and_snr_detail.d2 / .svg
+    └── tx_chain_waveform.d2 / .svg      # máy phát thực tế (single-carrier): bit → RF
 ```
+
+## Học & chạy code — `LEARNING.ipynb`
+
+Toàn bộ phần code + giải thích nằm trong **notebook** [`LEARNING.ipynb`](LEARNING.ipynb)
+(kiểu Google Colab/Kaggle): mỗi khối là một ô **code chạy được** + ô **ghi chú** ngay
+dưới, chòm sao/đồ thị hiện **inline**.
+
+- Mở bằng **VS Code** (có sẵn hỗ trợ Jupyter) → bấm ▶ từng ô (`Shift+Enter`).
+- Cần: `sionna` 0.16 + `tensorflow` + `matplotlib` + `ipykernel`.
+- Mỗi khối có một ô **Note**: ghi chú/giải thích mình viết trước, bạn **sửa trực tiếp** theo ý mình.
 
 ## Sơ đồ
 
@@ -48,6 +59,8 @@ Yêu cầu: [D2](https://d2lang.com) (`winget install Terrastruct.D2`). Mở `.s
 ## Trạng thái
 
 - [x] Sơ đồ kiến trúc hệ thống + chi tiết kênh/SNR
-- [ ] Code PHY link (nguồn bit → mapper → kênh → equalizer → demapper → BER)
-- [ ] Đường cong BER vs SNR (mô phỏng + lý thuyết)
+- [x] **Notebook 01** — Nguồn bit + Mapper (BPSK/QPSK/16QAM) + chòm sao
+- [ ] Notebook 02 — Kênh (AWGN/Rayleigh) + quy đổi Eb/N0 + cân bằng ZF
+- [ ] Notebook 03 — Demapper + đo BER
+- [ ] Notebook 04 — Đường cong BER vs SNR (mô phỏng + lý thuyết)
 - [ ] Lớp quyết định AMC (oracle, ML, online) — giai đoạn sau
