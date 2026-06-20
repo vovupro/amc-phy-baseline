@@ -34,6 +34,8 @@ rayl: |`md
 snr: |`md
   ### Quy đổi Eb/N0 → no
 
+  `no = sn.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)`
+
   | đại lượng | biểu thức |
   |---|---|
   | Es/N0 (lin) | = (Eb/N0 lin) × num_bits_per_symbol |
@@ -41,8 +43,6 @@ snr: |`md
   | BPSK | Es/N0 = Eb/N0 × 1 |
   | QPSK | Es/N0 = Eb/N0 × 2 |
   | 16QAM | Es/N0 = Eb/N0 × 4 |
-
-  `no = sn.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)`
 `| { class: note }
 
 trap: |`md
