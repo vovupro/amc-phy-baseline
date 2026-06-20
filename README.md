@@ -27,8 +27,9 @@ Toàn bộ phần code + giải thích nằm trong **notebook** [`LEARNING.ipynb
 dưới, chòm sao/đồ thị hiện **inline**.
 
 - Mở bằng **VS Code** (có sẵn hỗ trợ Jupyter) → bấm ▶ từng ô (`Shift+Enter`).
-- Cần: `sionna` 0.16 + `tensorflow` + `matplotlib` + `ipykernel`.
-- Mỗi khối có một ô **Note**: ghi chú/giải thích mình viết trước, bạn **sửa trực tiếp** theo ý mình.
+- **Môi trường:** Sionna **2.0** (nền **PyTorch**) trong venv riêng — tạo bằng `python -m venv .venv-sionna2` rồi `.venv-sionna2\Scripts\pip install -r requirements.txt` (kéo theo `torch` + `numpy 2.x`).
+- Trong VS Code: mở notebook → **Select Kernel** (góc trên phải) → chọn **Python (Sionna 2.0)**.
+- Mỗi khối có ô **ghi chú** (markdown): giải thích mình viết trước, bạn **sửa trực tiếp** theo ý mình.
 
 ## Sơ đồ
 

@@ -5,6 +5,7 @@ __pycache__/
 
 # Môi trường ảo
 .venv/
+.venv*/
 venv/
 env/
 

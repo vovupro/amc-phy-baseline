@@ -1,0 +1,6 @@
+# Môi trường đồ án — Sionna 2.0 (nền PyTorch).
+# Tạo venv rồi cài:  python -m venv .venv-sionna2 && .venv-sionna2\Scripts\pip install -r requirements.txt
+# (sionna 2.0.1 tự kéo theo torch >= 2.9 và numpy >= 2.2)
+sionna==2.0.1
+ipykernel
+nbconvert
