@@ -16,7 +16,7 @@ title: |`md
 }
 
 awgn: |`md
-  **Chế độ AWGN** — `sn.channel.AWGN`
+  **Chế độ AWGN** — `sn.phy.channel.AWGN`
 
   - y = x + n,  n ~ CN(0, no)
   - Không méo biên độ / pha
@@ -34,7 +34,7 @@ rayl: |`md
 snr: |`md
   ### Quy đổi Eb/N0 → no
 
-  `no = sn.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)`
+  `no = sn.phy.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)`
 
   | đại lượng | biểu thức |
   |---|---|

@@ -19,14 +19,14 @@ title: |`md
 }
 
 src: |`md
-  **1. Nguồn bit** — `sn.utils.BinarySource`
+  **1. Nguồn bit** — `sn.phy.mapping.BinarySource`
 
   - Sinh bit ngẫu nhiên
   - shape [batch, N], b = 0/1
 `| { class: tx }
 
 map: |`md
-  **2. Mapper** — `sn.mapping.Mapper`
+  **2. Mapper** — `sn.phy.mapping.Mapper`
 
   - BPSK → (pam, 1) · QPSK → (qam, 2) · 16QAM → (qam, 4)
   - Gray code, chuẩn hoá Es = 1
@@ -41,24 +41,25 @@ chan: |`md
 `| { class: ch }
 
 eq: |`md
-  **4. Cân bằng kênh** — ZF 1-tap (tự viết)
+  **4. Cân bằng kênh** — ZF 1-tap
 
-  - x_hat = y / h
+  - x_hat = y / h  (tự suy để hiểu)
+  - Sionna: `sn.phy.mimo.zf_equalizer` (chạy được SISO)
   - perfect CSI (AWGN: h = 1)
 `| { class: rx }
 
 demap: |`md
-  **5. Demapper** — `sn.mapping.Demapper` (hard_out=True)
+  **5. Demapper** — `sn.phy.mapping.Demapper` (hard_out=True)
 
   - hard decision, khoảng cách min
   - (tính LLR rồi threshold)
 `| { class: rx }
 
 ber: |`md
-  **6. Đo BER** — tự đếm + `sn.utils.compute_ber`
+  **6. Đo BER** — `sn.phy.utils.compute_ber`
 
-  - đếm b ≠ b_hat
-  - BER = số lỗi / N
+  - đếm b ≠ b_hat ; BER = số lỗi / N
+  - đường cong: `sim_ber` + `PlotBER` (Monte Carlo có sẵn)
 `| { class: util }
 
 # luồng chính (phát -> thu)
@@ -78,9 +79,9 @@ chan -> eq: "h (CSI)" { class: e-csi }
 
 # ghi chú quy đổi SNR + Monte Carlo
 snrnote: |`md
-  `Eb/N0 (dB)` → ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1) → `no`
+  `Eb/N0 (dB)` → `sn.phy.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)` → `no`
 
   - Sionna chuẩn hoá Es = 1 → no = N0 (tổng phương sai nhiễu PHỨC); mỗi chiều thực N0/2 (trùng N0/2 của sách).
-  - Monte Carlo: dừng khi gặp ≥ 200 lỗi (không cố định số bit), cap ≤ 1e7 bit.
+  - Monte Carlo: `sim_ber` dừng khi đủ số lỗi mục tiêu (num_target_block_errors), cap số bit.
 `| { class: note }
 ber -> snrnote { style.opacity: 0.0 }
