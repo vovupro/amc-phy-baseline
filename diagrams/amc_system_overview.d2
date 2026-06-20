@@ -1,0 +1,115 @@
+# ======================================================================
+# amc_system_overview.d2 — Toàn cảnh hệ thống AMC (bức tranh lớn).
+# Render:  python build.py amc_system_overview
+# Ghi chú:
+#   • Block string nâng cao  |`md ... `|  để nội dung chứa được ký tự '|'.
+#   • Mỗi ý là một bullet "- ..." (markdown gộp các dòng liền nhau không có
+#     dòng trống thành 1 đoạn -> phải dùng bullet để tách dòng).
+#   • Nhấn mạnh "đang xây" bằng FILL (xanh lá), KHÔNG bằng viền — node md
+#     bỏ stroke (xem _theme.d2).
+# ======================================================================
+...@_theme
+direction: down
+
+title: |`md
+  # Toàn cảnh hệ thống AMC (Adaptive Modulation & Coding)
+  Khối XANH LÁ = đang xây ở project HIỆN TẠI (baseline PHY) · các khối/khung còn lại = lớp AMC giai đoạn sau
+`| {
+  near: top-center
+  shape: text
+  style.font-size: 22
+}
+
+# ---- Hàng định nghĩa bài toán: STATE | ACTION | OBJECTIVE ----
+state: |`md
+  **STATE  s** — trạng thái kênh + QoS
+
+  - SNR profile: mean/var/min/percentile
+  - Doppler / coherence time
+  - độ tin cậy CSI (var của SNR ước lượng)
+  - QoS: target BLER (~10%), latency budget
+`| { class: note }
+
+action: |`md
+  **ACTION  a** — chế độ truyền (MCS)
+
+  - modulation {BPSK, QPSK, 16QAM}
+  - × code rate {1/2, 2/3, 3/4}
+  - × số vòng lặp decoder {5, 10, 20}
+  - → bảng MCS thu gọn (~9 mode)
+`| { class: note }
+
+obj: |`md
+  **OBJECTIVE** — hàm mục tiêu (tối ưu có ràng buộc)
+
+  - max throughput hiệu dụng:
+  - η = R_code × log₂(M) × (1 − BLER)
+  - ràng buộc: BLER ≤ target, runtime ≤ budget
+`| { class: note }
+
+# ---- Môi trường mô phỏng (ĐANG XÂY — fill xanh lá làm dấu hiệu) ----
+phy: |`md
+  **PHY LINK SIMULATOR** — môi trường mô phỏng (ĐANG XÂY)
+
+  - Vào: (channel realization, action a)
+  - Ra: BER, BLER, throughput, runtime
+  - _single-carrier, perfect CSI; chưa LDPC/OFDM — nâng cấp sau_
+`| { class: rx }
+
+# ---- OFFLINE: oracle -> dataset -> huấn luyện ML ----
+offline: OFFLINE — sinh nhãn & huấn luyện {
+  class: g-offline
+
+  oracle: |`md
+    **ORACLE / GENIE** (vét cạn) — bộ sinh nhãn
+
+    - với mỗi state s: thử MỌI action a qua simulator
+    - đo BLER tin cậy (Monte Carlo ≥ N lỗi)
+    - chọn a*(s) = argmax objective
+    - → LUT tối ưu / upper bound
+  `| { class: off }
+
+  data: |`md
+    **DATASET {(s, a\*)}** — cặp trạng thái → hành động tối ưu
+  `| { class: off }
+
+  mltrain: |`md
+    **ML POLICY π(s)** — DT / RandomForest / GBDT
+
+    - học ánh xạ s → a*
+    - = bản NÉN & GENERALIZE của oracle (nhẹ, giải thích được)
+  `| { class: off }
+
+  oracle -> data -> mltrain
+}
+
+# ---- ONLINE: bộ quyết định runtime ----
+online: ONLINE — vòng quyết định runtime {
+  class: g-online
+
+  ctrl: |`md
+    **BỘ QUYẾT ĐỊNH + HYSTERESIS**
+
+    - s_t → π(s_t) → a_candidate
+    - Hysteresis: chỉ đổi mode khi vượt ngưỡng & giữ đủ lâu
+    - → a_final (mode phát)
+  `| { class: on }
+}
+
+# ---- Đánh giá & so sánh ----
+eval: |`md
+  **ĐÁNH GIÁ & SO SÁNH** — 3 chính sách
+
+  - Fixed-robust (BPSK 1/2) · Fixed-high-TP (16QAM 3/4) · AI-adaptive π
+  - Sản phẩm: BER vs SNR · Throughput vs SNR · Runtime · Policy map (SNR → mode)
+`| { class: util }
+
+# ---- Cạnh: tất cả chảy XUÔI XUỐNG (acyclic -> không đi chéo) ----
+action -> phy: a
+phy -> offline.oracle: "BER/BLER, throughput, runtime"
+obj -> offline.oracle: tiêu chí chọn { class: e-offline }
+state -> offline.oracle: duyệt theo s { class: e-offline }
+offline.mltrain -> online.ctrl: "π(s)"
+state -> online.ctrl: s_t đo online { class: e-online }
+online.ctrl -> eval: "AI-adaptive a*" { class: e-online }
+phy -> eval: đo 3 chính sách

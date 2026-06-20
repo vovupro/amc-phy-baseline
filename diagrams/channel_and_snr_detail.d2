@@ -1,0 +1,57 @@
+# ======================================================================
+# channel_and_snr_detail.d2 — Chi tiết khối kênh & quy đổi Eb/N0 -> no.
+# Render:  python build.py channel_and_snr_detail
+# Ghi chú: block string nâng cao  |`md ... `|  cho bảng markdown (có '|')
+#          và |h|²; mỗi ý là một bullet "- ..." để tách dòng chuẩn.
+# ======================================================================
+...@_theme
+direction: down
+
+title: |`md
+  # Chi tiết khối kênh & quy đổi Eb/N0 → no
+`| {
+  near: top-center
+  shape: text
+  style.font-size: 18
+}
+
+awgn: |`md
+  **Chế độ AWGN** — `sn.channel.AWGN`
+
+  - y = x + n,  n ~ CN(0, no)
+  - Không méo biên độ / pha
+  - Equalizer: bỏ qua (h = 1)
+`| { class: ch }
+
+rayl: |`md
+  **Chế độ Rayleigh (flat) + AWGN**
+
+  - h = (randn + j·randn) / √2,  h ~ CN(0,1),  E[|h|²] = 1
+  - y = h·x + n  (mỗi symbol một h mới — fast fading)
+  - Equalizer ZF: x_hat = y / h
+`| { class: ch }
+
+snr: |`md
+  ### Quy đổi Eb/N0 → no
+
+  | đại lượng | biểu thức |
+  |---|---|
+  | Es/N0 (lin) | = (Eb/N0 lin) × num_bits_per_symbol |
+  | no | = 1 / (Es/N0 lin)   — Sionna đặt Es = 1 |
+  | BPSK | Es/N0 = Eb/N0 × 1 |
+  | QPSK | Es/N0 = Eb/N0 × 2 |
+  | 16QAM | Es/N0 = Eb/N0 × 4 |
+
+  `no = sn.utils.ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1)`
+`| { class: note }
+
+trap: |`md
+  **CẠM BẪY — noise enhancement**
+
+  - Ở SNR cao, |h| có thể rất nhỏ → x_hat = y/h khuếch đại nhiễu.
+  - Đây là lý do BER trên Rayleigh tệ hơn AWGN nhiều dù cùng Eb/N0.
+`| { class: warn }
+
+awgn -> snr
+rayl -> snr
+snr -> trap

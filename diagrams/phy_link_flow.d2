@@ -1,0 +1,86 @@
+# ======================================================================
+# phy_link_flow.d2 — Baseline PHY link (single-carrier): luồng phát -> thu.
+# Render:  python build.py phy_link_flow
+# Ghi chú:
+#   • Block string nâng cao  |`md ... `|  để nội dung chứa được ký tự '|'.
+#   • Mỗi ý là một gạch đầu dòng "- ..." (markdown gộp các dòng liền nhau
+#     không có dòng trống thành 1 đoạn -> phải dùng bullet để tách dòng).
+# ======================================================================
+...@_theme
+direction: down
+
+title: |`md
+  # Baseline PHY Link (single-carrier) — luồng phát → thu
+  Cấu hình CỐ ĐỊNH: chưa channel coding · chưa OFDM/MIMO · perfect CSI · chưa ML  (nền cho giai đoạn AMC)
+`| {
+  near: top-center
+  shape: text
+  style.font-size: 18
+}
+
+src: |`md
+  **1. Nguồn bit** — `sn.utils.BinarySource`
+
+  - Sinh bit ngẫu nhiên
+  - shape [batch, N], b = 0/1
+`| { class: tx }
+
+map: |`md
+  **2. Mapper** — `sn.mapping.Mapper`
+
+  - BPSK → (pam, 1) · QPSK → (qam, 2) · 16QAM → (qam, 4)
+  - Gray code, chuẩn hoá Es = 1
+`| { class: tx }
+
+chan: |`md
+  **3. Kênh truyền** — AWGN | Rayleigh
+
+  - AWGN:  y = x + n
+  - Rayleigh:  y = h·x + n
+  - n ~ CN(0, no)
+`| { class: ch }
+
+eq: |`md
+  **4. Cân bằng kênh** — ZF 1-tap (tự viết)
+
+  - x_hat = y / h
+  - perfect CSI (AWGN: h = 1)
+`| { class: rx }
+
+demap: |`md
+  **5. Demapper** — `sn.mapping.Demapper` (hard_out=True)
+
+  - hard decision, khoảng cách min
+  - (tính LLR rồi threshold)
+`| { class: rx }
+
+ber: |`md
+  **6. Đo BER** — tự đếm + `sn.utils.compute_ber`
+
+  - đếm b ≠ b_hat
+  - BER = số lỗi / N
+`| { class: util }
+
+# luồng chính (phát -> thu)
+src -> map: bits b
+map -> chan: symbols x
+chan -> eq: y nhận
+eq -> demap: "x_hat"
+demap -> ber: "b_hat"
+
+# đầu vào phụ (noise variance) + CSI cho equalizer
+no: |`md
+  **no** — noise variance
+`| { class: note }
+no -> chan { class: e-side }
+no -> demap { class: e-side }
+chan -> eq: "h (CSI)" { class: e-csi }
+
+# ghi chú quy đổi SNR + Monte Carlo
+snrnote: |`md
+  `Eb/N0 (dB)` → ebnodb2no(ebno_db, num_bits_per_symbol, coderate=1) → `no`
+
+  - Sionna chuẩn hoá Es = 1 → no = N0 (tổng phương sai nhiễu PHỨC); mỗi chiều thực N0/2 (trùng N0/2 của sách).
+  - Monte Carlo: dừng khi gặp ≥ 200 lỗi (không cố định số bit), cap ≤ 1e7 bit.
+`| { class: note }
+ber -> snrnote { style.opacity: 0.0 }

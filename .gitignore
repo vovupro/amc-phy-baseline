@@ -13,6 +13,3 @@ env/
 Thumbs.db
 .vscode/
 .idea/
-
-# Cấu hình theo máy (đường dẫn chrome.exe tuyệt đối — không nên commit)
-diagrams/compare/puppeteer-config.json

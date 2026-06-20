@@ -1,0 +1,33 @@
+# ======================================================================
+# _theme.d2 — BẢNG MÀU & LỚP STYLE DÙNG CHUNG cho mọi sơ đồ D2.
+# Sửa MÀU/STYLE ở đây  ->  áp cho TẤT CẢ sơ đồ (mỗi sơ đồ "...@_theme").
+# KHÔNG render trực tiếp file này (build.py bỏ qua file bắt đầu bằng "_").
+#
+# !!! LƯU Ý D2 v0.7.1 — node nhãn markdown ( |`md ... `| ) render thành <div>
+#     HTML chỉ nhận MÀU NỀN (fill); MỌI 'stroke' (viền) trên node md đều BỊ BỎ.
+#     => Nhấn mạnh khối CHỈ bằng fill, KHÔNG bằng viền. Viền chỉ hiện trên
+#        KHUNG nhóm (container) và CẠNH (edge).
+# QUY ƯỚC nét đứt: stroke-dash 3 = cạnh; stroke-dash 4 = khung.
+# ======================================================================
+
+classes: {
+  # --- màu nền khối theo VAI TRÒ (chỉ fill — xem lưu ý trên) ---
+  tx:   { style.fill: "#cfe8ff" }   # xanh      : phía phát (TX)
+  ch:   { style.fill: "#ffd6d6" }   # đỏ        : kênh truyền
+  rx:   { style.fill: "#d8f5d0" }   # lá        : phía thu (RX) — cũng là màu "ĐANG XÂY"
+  util: { style.fill: "#fff3c4" }   # vàng      : đo lường / đánh giá
+  note: { style.fill: "#eef5ff" }   # xanh nhạt : định nghĩa / ghi chú
+  off:  { style.fill: "#e7e0ff" }   # tím       : khối OFFLINE (oracle + ML)
+  on:   { style.fill: "#ffe3c2" }   # cam       : khối ONLINE (runtime)
+  warn: { style.fill: "#ffe0e0" }   # đỏ nhạt   : cảnh báo / cạm bẫy
+
+  # --- KHUNG nhóm (container): viền HIỆN vì là khối thật (không phải md) ---
+  g-offline: { style: { stroke: "#7a5cc0"; stroke-dash: 4; fill: "#faf8ff" } }
+  g-online:  { style: { stroke: "#d08a2c"; stroke-dash: 4; fill: "#fff7ee" } }
+
+  # --- kiểu CẠNH theo loại ---
+  e-offline: { style: { stroke: "#7a5cc0"; stroke-dash: 3 } }  # tiêu chí / duyệt offline
+  e-online:  { style: { stroke: "#d08a2c"; stroke-dash: 3 } }  # vòng quyết định online
+  e-side:    { style: { stroke: "#b03030"; stroke-dash: 3 } }  # đầu vào phụ (no)
+  e-csi:     { style: { stroke: "#3a7d34"; stroke-dash: 3 } }  # CSI -> equalizer
+}
